@@ -1,31 +1,28 @@
-package send_to_telegram
+package telegram
 
+import com.android.build.gradle.internal.crash.afterEvaluate
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
 import org.jetbrains.kotlin.gradle.plugin.*
 
 class SendFileToTelegramPlugin: KotlinCompilerPluginSupportPlugin  {
-    private val id = "send-file-to-telegram-plugin"
 
     override fun apply(target: Project) {
-        val extension = target.extensions.create("telegram", SendFileToTelegramExtension::class.java)
+        target.extensions.create("telegram", SendFileToTelegramExtension::class.java)
 
-        val pathToFile = extension.pathToFile
-        val runAfterTask = extension.runAfterTask
-        val botToken = extension.botToken
-        val chatId = extension.chatId
+        target.tasks.register("sendToTelegram", Exec::class.java){ task ->
+            val extension = target.extensions.getByName("telegram") as SendFileToTelegramExtension
 
-        val sendTask = target.tasks.register("sendToTelegram", Exec::class.java){ task ->
+            task.dependsOn(extension.runAfterTask.get())
+
             task.commandLine(
                 "curl",
                 "-F",
-                "document=@${pathToFile.asFile.get()}",
-                "\"https://api.telegram.org/bot${botToken.get()}/sendDocument?chat_id=${chatId.get()}\""
+                "document=@${extension.pathToFile.asFile.get()}",
+                "\"https://api.telegram.org/bot${extension.botToken.get()}/sendDocument?chat_id=${extension.chatId.get()}\""
             )
         }
-
-        target.tasks.getByName(runAfterTask.get()).finalizedBy(sendTask)
 
     }
 
@@ -39,12 +36,12 @@ class SendFileToTelegramPlugin: KotlinCompilerPluginSupportPlugin  {
         }
     }
 
-    override fun getCompilerPluginId(): String = id
+    override fun getCompilerPluginId(): String = "send.file.telegram.id"
 
     override fun getPluginArtifact(): SubpluginArtifact =
         SubpluginArtifact(
             groupId = "io.privatik",
-            artifactId = id,
+            artifactId = "send-file-to-telegram-plugin-compile",
             version = "1.0.0-SNAPSHOT"
         )
 

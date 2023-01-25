@@ -1,30 +1,18 @@
 plugins {
-    kotlin("jvm")
+    kotlin("jvm") version "1.7.10"
     `java-gradle-plugin`
-    id("kotlin-kapt")
+    kotlin("kapt") version "1.7.10"
     id("maven-publish")
 }
 
 group = "io.privatik"
 version = "1.0.0-SNAPSHOT"
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10")
-        classpath("com.android.tools.build:gradle:4.1.1")
-    }
-}
-
 gradlePlugin {
     plugins {
         create("sendToTelegram-plugin"){
             id = "io.privatik.send-file-to-telegram-plugin"
-            implementationClass = "send_to_telegram.SendFileToTelegramPlugin"
+            implementationClass = "telegram.SendFileToTelegramPlugin"
         }
     }
 }
